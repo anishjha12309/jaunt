@@ -21,7 +21,8 @@ export function GlassNav({ tabs, search, className }: GlassNavProps) {
         )}
       >
         <Wordmark />
-        {tabs && <div className="flex items-center gap-1">{tabs}</div>}
+        {tabs && <span aria-hidden="true" className="h-5 w-px bg-hairline" />}
+        {tabs}
         {search}
         <FailureDot />
       </nav>

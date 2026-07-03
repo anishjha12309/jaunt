@@ -1,8 +1,14 @@
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useEffect, useMemo, useState } from 'react'
 import { apiGet } from '@/api/client'
 import { queryKeys } from '@/api/queryKeys'
-import type { Conversation, QueueFilters, QueueResponse, QueueSummary } from '@/api/types'
+import type {
+  Conversation,
+  QueueFilters,
+  QueueResponse,
+  QueueSummary,
+  TabCounts,
+} from '@/api/types'
 import { bucketFor, scoreConversation, type Bucket } from '@/lib/priority'
 
 const RANK_TICK_MS = 30_000
@@ -16,6 +22,7 @@ export interface RankedConversation {
 export interface UseQueueResult {
   ranked: RankedConversation[]
   summary: QueueSummary | undefined
+  tabCounts: TabCounts | undefined
   isPending: boolean
   isError: boolean
   error: Error | null
@@ -48,6 +55,8 @@ export function useQueue(filters: QueueFilters): UseQueueResult {
   const query = useQuery({
     queryKey: queryKeys.conversations(filters),
     queryFn: () => apiGet<QueueResponse>(`/api/conversations?${buildQueryString(filters)}`),
+    // Keep the current list visible while a filter change refetches — no skeleton flash.
+    placeholderData: keepPreviousData,
   })
 
   // Re-rank every 30s so SLA drift reorders the queue without churning it each second.
@@ -63,6 +72,7 @@ export function useQueue(filters: QueueFilters): UseQueueResult {
   return {
     ranked,
     summary: query.data?.summary,
+    tabCounts: query.data?.tabCounts,
     isPending: query.isPending,
     isError: query.isError,
     error: query.error,

@@ -1,21 +1,39 @@
 import { PageShell } from '@/app/PageShell'
 import { Button } from '@/components/Button'
 import { EmptyState } from '@/components/EmptyState'
-import type { QueueFilters } from '@/api/types'
 import { ConversationList } from '@/features/inbox/ConversationList'
+import { FilterTabs } from '@/features/inbox/FilterTabs'
 import { NowProvider } from '@/features/inbox/NowProvider'
 import { QueueSkeleton } from '@/features/inbox/QueueSkeleton'
+import { SearchBox } from '@/features/inbox/SearchBox'
+import { StatusSelect } from '@/features/inbox/StatusSelect'
+import { SummaryStrip } from '@/features/inbox/SummaryStrip'
 import { useQueue } from '@/features/inbox/useQueue'
-
-// Phase 4 replaces this fixed filter with URL-param state (product default: status 'open').
-const PHASE3_FILTERS: QueueFilters = { tab: 'all', status: 'all', q: '' }
+import { useQueueParams } from '@/features/inbox/useQueueParams'
 
 export function QueuePage() {
-  const { ranked, isPending, isError, error, refetch } = useQueue(PHASE3_FILTERS)
+  const { filters, setTab, setStatus, setQ, clear, hasActiveFilters } = useQueueParams()
+  const { ranked, summary, tabCounts, isPending, isError, error, refetch } = useQueue(filters)
+  const resultCount = ranked.length
 
   return (
-    <PageShell title="Escalations">
+    <PageShell
+      title="Escalations"
+      navTabs={<FilterTabs active={filters.tab} counts={tabCounts} onSelect={setTab} />}
+      navSearch={<SearchBox value={filters.q} onChange={setQ} />}
+      titleAside={
+        <>
+          {filters.q !== '' && (
+            <span className="font-mono-label text-muted">
+              {resultCount} result{resultCount === 1 ? '' : 's'}
+            </span>
+          )}
+          <StatusSelect value={filters.status} onChange={setStatus} />
+        </>
+      }
+    >
       <NowProvider>
+        {summary && <SummaryStrip summary={summary} />}
         {isPending ? (
           <QueueSkeleton />
         ) : isError ? (
@@ -29,10 +47,26 @@ export function QueuePage() {
             }
           />
         ) : ranked.length === 0 ? (
-          <EmptyState
-            title="Queue clear 🎉"
-            body="Nothing needs you right now. New escalations will land here as they arrive."
-          />
+          hasActiveFilters ? (
+            <EmptyState
+              title="No matches"
+              body={
+                filters.q !== ''
+                  ? `No open conversations match "${filters.q}". Try a different search or clear your filters.`
+                  : 'No conversations match these filters right now.'
+              }
+              action={
+                <Button variant="ghost" onClick={clear}>
+                  Clear filters
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              title="Queue clear 🎉"
+              body="Nothing needs you right now. New escalations will land here as they arrive."
+            />
+          )
         ) : (
           <ConversationList ranked={ranked} />
         )}

@@ -1,5 +1,11 @@
 import { delay, http, HttpResponse } from 'msw'
-import type { Conversation, QueueResponse, QueueSummary, TriageRequestBody } from '@/api/types'
+import type {
+  Conversation,
+  QueueResponse,
+  QueueSummary,
+  TabCounts,
+  TriageRequestBody,
+} from '@/api/types'
 import { conversations as seedConversations, CURRENT_AGENT_ID } from '@/mocks/data'
 import { isFailureModeEnabled, setFailureMode } from '@/mocks/failureFlag'
 
@@ -41,6 +47,16 @@ function matchesQuery(conversation: Conversation, q: string): boolean {
   )
 }
 
+/** Counts for each tab within the current status+search filter (tab itself excluded). */
+function computeTabCounts(scoped: Conversation[], now: number): TabCounts {
+  return {
+    all: scoped.length,
+    mine: scoped.filter((c) => c.assigneeId === CURRENT_AGENT_ID).length,
+    unassigned: scoped.filter((c) => c.assigneeId === null).length,
+    breached: scoped.filter((c) => isBreached(c, now)).length,
+  }
+}
+
 function computeSummary(now: number): QueueSummary {
   const openConversations = db.filter((c) => c.status === 'open')
   return {
@@ -80,14 +96,17 @@ export const handlers = [
     const q = url.searchParams.get('q') ?? ''
     const now = Date.now()
 
-    const items = db.filter(
-      (conversation) =>
-        matchesTab(conversation, tab, now) &&
-        matchesStatus(conversation, status) &&
-        matchesQuery(conversation, q),
+    // Scope by status + search first so tab counts reflect the other active filters.
+    const scoped = db.filter(
+      (conversation) => matchesStatus(conversation, status) && matchesQuery(conversation, q),
     )
+    const items = scoped.filter((conversation) => matchesTab(conversation, tab, now))
 
-    const response: QueueResponse = { items, summary: computeSummary(now) }
+    const response: QueueResponse = {
+      items,
+      summary: computeSummary(now),
+      tabCounts: computeTabCounts(scoped, now),
+    }
     return HttpResponse.json(response)
   }),
 

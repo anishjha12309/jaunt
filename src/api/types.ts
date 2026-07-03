@@ -53,9 +53,12 @@ export interface QueueSummary {
   snoozedReturning: number
 }
 
+export type TabCounts = Record<QueueTab, number>
+
 export interface QueueResponse {
   items: Conversation[]
   summary: QueueSummary
+  tabCounts: TabCounts
 }
 
 export interface QueueFilters {
