@@ -16,6 +16,13 @@ const TONE_CLASS: Record<CountdownTone, string> = {
 /**
  * The only live cell in a row — subscribes to the page 1s clock so the SLA
  * countdown ticks while the rest of the row stays static.
+ *
+ * The countdown (and its "Breached" flip) is intentionally NOT wrapped in an
+ * aria-live region: it re-renders every second across dozens of rows, so
+ * announcing it would flood a screen reader with noise. Urgency is instead
+ * conveyed by the ranked position — the most urgent items sit at the top — and
+ * the text stays readable on demand. The colour + pulse are purely visual
+ * reinforcement, so the critical tone also carries no live announcement.
  */
 export function RowTiming({ slaDueAt, createdAt }: RowTimingProps) {
   const now = useNow()
@@ -32,7 +39,7 @@ export function RowTiming({ slaDueAt, createdAt }: RowTimingProps) {
       >
         {countdown.text}
       </span>
-      <span className="font-mono text-[11px] text-muted/80">waited {formatWaited(createdAt, now)}</span>
+      <span className="font-mono text-[11px] text-muted">waited {formatWaited(createdAt, now)}</span>
     </div>
   )
 }

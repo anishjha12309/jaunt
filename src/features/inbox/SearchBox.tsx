@@ -81,7 +81,7 @@ export function SearchBox({ value, onChange, focusToken }: SearchBoxProps) {
         onKeyDown={onInputKeyDown}
         onBlur={collapseIfEmpty}
         className={cn(
-          'bg-transparent text-[13px] text-ink outline-none transition-all placeholder:text-muted/70',
+          'bg-transparent text-[13px] text-ink outline-none transition-all placeholder:text-muted',
           isOpen ? 'w-44 opacity-100' : 'w-0 opacity-0',
         )}
       />

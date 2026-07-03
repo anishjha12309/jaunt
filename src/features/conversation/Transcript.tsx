@@ -58,7 +58,7 @@ export function Transcript({ messages, customerName }: TranscriptProps) {
                 <span className="font-mono-label text-muted">
                   {authorLabel(message.author, customerName)}
                 </span>
-                <time dateTime={message.at} className="font-mono text-[11px] text-muted/70">
+                <time dateTime={message.at} className="font-mono text-[11px] text-muted">
                   {formatAt(message.at)}
                 </time>
               </div>

@@ -7,6 +7,8 @@ import { EmptyState } from '@/components/EmptyState'
 import { GlassNav } from '@/components/GlassNav'
 import type { Conversation } from '@/api/types'
 import { CHANNEL_LABEL, STATUS_LABEL, STATUS_TONE, TIER_LABEL } from '@/lib/labels'
+import { useDocumentTitle } from '@/lib/useDocumentTitle'
+import { useFocusOnMount } from '@/lib/useFocusOnMount'
 import { useFadeIn } from '@/lib/motion'
 import { undoLatest } from '@/components/toastStore'
 import { FailureToggle } from '@/features/actions/FailureToggle'
@@ -28,6 +30,16 @@ export function DetailPage() {
   const actions = useTriageActions()
   const { orderedIds } = useShortcutsContext()
   const [snoozeToken, setSnoozeToken] = useState<number | undefined>(undefined)
+
+  const pageTitle =
+    !id || notFound
+      ? 'Conversation not found'
+      : isError
+        ? "Couldn't load conversation"
+        : conversation
+          ? conversation.customer.name
+          : 'Loading conversation'
+  useDocumentTitle(pageTitle)
 
   // Return to the queue exactly as it was (filters live in its URL) when we got
   // here in-app; fall back to a fresh queue on a cold deep-link/reload.
@@ -114,13 +126,18 @@ function LoadedDetail({
 }) {
   const { customer, channel, subject, status, escalation, messages } = conversation
   const rootRef = useRef<HTMLDivElement>(null)
+  const headingRef = useFocusOnMount<HTMLHeadingElement>()
   useFadeIn(rootRef)
 
   return (
     <div ref={rootRef}>
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="truncate text-section font-semibold tracking-tight text-ink">
+          <h1
+            ref={headingRef}
+            tabIndex={-1}
+            className="scroll-mt-28 truncate text-section font-semibold tracking-tight text-ink focus:outline-none"
+          >
             {customer.name}
           </h1>
           <p className="mt-0.5 text-body text-muted">

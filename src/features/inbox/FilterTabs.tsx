@@ -38,7 +38,7 @@ export function FilterTabs({ active, counts, onSelect }: FilterTabsProps) {
               <span
                 className={cn(
                   'font-mono text-[11px] tabular-nums',
-                  isActive ? 'text-blue-ink' : 'text-muted/70',
+                  isActive ? 'text-blue-ink' : 'text-muted',
                   tab.id === 'breached' && count > 0 && 'text-critical',
                 )}
               >
