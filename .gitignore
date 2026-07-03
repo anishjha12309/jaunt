@@ -1,0 +1,14 @@
+# --- Claude prerequisites (never commit) ---
+CLAUDE.md
+claude_docs/
+.claude/
+
+# --- Node / Vite (kept when scaffolding; do not remove the block above) ---
+node_modules/
+dist/
+coverage/
+*.local
+.env
+.env.*
+npm-debug.log*
+.DS_Store

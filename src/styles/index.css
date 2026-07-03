@@ -1,0 +1,72 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource-variable/jetbrains-mono";
+
+@theme {
+  /* Canvas / surfaces */
+  --color-paper: #f2f1ea;
+  --color-surface: #ffffff;
+  --color-hairline: #e4e2d8;
+
+  /* Ink */
+  --color-ink: #1b1b18;
+  --color-muted: #5c5a51;
+
+  /* Electric blue */
+  --color-blue: #1d40f0;
+  --color-blue-ink: #1332c8;
+  --color-selected-wash: color-mix(in srgb, #1d40f0 6%, transparent);
+
+  /* Status */
+  --color-critical: #b42318;
+  --color-critical-tint: color-mix(in srgb, #b42318 10%, transparent);
+  --color-warn: #b54708;
+  --color-warn-tint: color-mix(in srgb, #b54708 10%, transparent);
+  --color-ok: #067647;
+  --color-ok-tint: color-mix(in srgb, #067647 10%, transparent);
+  --color-snoozed: #5c5a51;
+  --color-snoozed-tint: color-mix(in srgb, #5c5a51 10%, transparent);
+
+  /* Dark ink panels */
+  --color-panel: #1b1b18;
+  --color-panel-text: #f2f1ea;
+
+  /* Radii */
+  --radius-card: 16px;
+  --radius-chip: 10px;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-soft: 0 1px 2px rgb(27 27 24 / 0.06);
+
+  /* Type */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  --text-meta: 12px;
+  --text-mono: 13px;
+  --text-body: 14px;
+  --text-row-title: 16px;
+  --text-section: 22px;
+  --text-page-title: 32px;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-blue);
+    outline-offset: 2px;
+  }
+}
+
+.font-mono-label {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--text-meta);
+}
