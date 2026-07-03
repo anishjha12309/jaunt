@@ -11,7 +11,7 @@ import {
   SENTIMENT_DOT,
   SENTIMENT_LABEL,
   TIER_LABEL,
-} from '@/features/inbox/labels'
+} from '@/lib/labels'
 import { RowTiming } from '@/features/inbox/RowTiming'
 
 interface ConversationRowProps {

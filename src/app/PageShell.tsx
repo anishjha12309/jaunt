@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { AppFooter } from '@/app/AppFooter'
 import { GlassNav } from '@/components/GlassNav'
 
 interface PageShellProps {
@@ -30,9 +31,7 @@ export function PageShell({ title, children, navTabs, navSearch, titleAside }: P
           </div>
         </header>
         {children}
-        <footer className="mt-16 border-t border-hairline pt-4">
-          <p className="font-mono-label text-muted">Demo data · Failure simulator in nav</p>
-        </footer>
+        <AppFooter />
       </main>
     </div>
   )
