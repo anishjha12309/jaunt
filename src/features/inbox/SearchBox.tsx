@@ -4,16 +4,13 @@ import { cn } from '@/lib/cn'
 interface SearchBoxProps {
   value: string
   onChange: (q: string) => void
+  /** Bumped by the `/` shortcut to focus the search from anywhere. */
+  focusToken?: number
 }
 
 const DEBOUNCE_MS = 250
 
-function isTypingTarget(el: EventTarget | null): boolean {
-  if (!(el instanceof HTMLElement)) return false
-  return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT'
-}
-
-export function SearchBox({ value, onChange }: SearchBoxProps) {
+export function SearchBox({ value, onChange, focusToken }: SearchBoxProps) {
   const [expanded, setExpanded] = useState(() => value !== '')
   const [draft, setDraft] = useState(value)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -28,18 +25,17 @@ export function SearchBox({ value, onChange }: SearchBoxProps) {
     return () => window.clearTimeout(id)
   }, [draft, value, onChange])
 
-  // `/` focuses search from anywhere (unless already typing in a field).
+  // The `/` shortcut (routed through the keyboard system so it respects the help
+  // overlay) bumps this token to expand and focus the field. Skip the first render.
+  const firstToken = useRef(true)
   useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      if (e.key === '/' && !isTypingTarget(e.target) && !e.metaKey && !e.ctrlKey) {
-        e.preventDefault()
-        setExpanded(true)
-        inputRef.current?.focus()
-      }
+    if (firstToken.current) {
+      firstToken.current = false
+      return
     }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+    setExpanded(true)
+    inputRef.current?.focus()
+  }, [focusToken])
 
   // Visible whenever the user opened it or there's a query to show.
   const isOpen = expanded || draft !== ''

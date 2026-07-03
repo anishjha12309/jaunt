@@ -4,6 +4,7 @@ import { belongsInView } from '@/lib/queueFilter'
 import { applyTriageAction } from '@/lib/triage'
 import { CURRENT_AGENT_ID } from '@/mocks/data'
 import { useNow } from '@/features/inbox/nowContext'
+import type { RowExit } from '@/features/inbox/useRowExit'
 import { ICON_BUTTON } from '@/features/actions/iconButton'
 import { SnoozeMenu } from '@/features/actions/SnoozeMenu'
 import { useTriageActions } from '@/features/actions/useTriageActions'
@@ -11,8 +12,9 @@ import { useTriageActions } from '@/features/actions/useTriageActions'
 interface RowQuickActionsProps {
   conversation: Conversation
   filters: QueueFilters
-  onBeginExit: (id: string) => void
-  onCancelExit: (id: string) => void
+  exit: RowExit
+  /** Bumped by the `s` shortcut to open this row's snooze menu. */
+  snoozeOpenToken?: number
   className?: string
 }
 
@@ -25,8 +27,8 @@ interface RowQuickActionsProps {
 export function RowQuickActions({
   conversation,
   filters,
-  onBeginExit,
-  onCancelExit,
+  exit,
+  snoozeOpenToken,
   className,
 }: RowQuickActionsProps) {
   const now = useNow()
@@ -45,10 +47,10 @@ export function RowQuickActions({
     minutes?: number,
   ) => {
     const leaving = wouldLeave(action, minutes)
-    if (leaving) onBeginExit(id)
+    if (leaving) exit.beginExit(id)
     run({
       onError: () => {
-        if (leaving) onCancelExit(id)
+        if (leaving) exit.cancelExit(id)
       },
     })
   }
@@ -95,6 +97,7 @@ export function RowQuickActions({
           <SnoozeMenu
             align="right"
             disabled={actions.isPending}
+            openToken={snoozeOpenToken}
             onSnooze={(minutes) => fire('snooze', (opts) => actions.snooze(id, minutes, opts), minutes)}
           />
         </>

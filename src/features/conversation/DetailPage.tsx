@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { AppFooter } from '@/app/AppFooter'
 import { Badge } from '@/components/Badge'
@@ -6,8 +7,11 @@ import { EmptyState } from '@/components/EmptyState'
 import { GlassNav } from '@/components/GlassNav'
 import type { Conversation } from '@/api/types'
 import { CHANNEL_LABEL, STATUS_LABEL, STATUS_TONE, TIER_LABEL } from '@/lib/labels'
+import { undoLatest } from '@/components/toastStore'
 import { FailureToggle } from '@/features/actions/FailureToggle'
+import { useTriageActions } from '@/features/actions/useTriageActions'
 import { NowProvider } from '@/features/inbox/NowProvider'
+import { useShortcuts, useShortcutsContext } from '@/features/shortcuts/shortcutsContext'
 import { ActionBar } from '@/features/conversation/ActionBar'
 import { CustomerSidebar } from '@/features/conversation/CustomerSidebar'
 import { DetailSkeleton } from '@/features/conversation/DetailSkeleton'
@@ -20,6 +24,9 @@ export function DetailPage() {
   const navigate = useNavigate()
   const location = useLocation()
   const { conversation, isPending, isError, notFound, error, refetch } = useConversation(id)
+  const actions = useTriageActions()
+  const { orderedIds } = useShortcutsContext()
+  const [snoozeToken, setSnoozeToken] = useState<number | undefined>(undefined)
 
   // Return to the queue exactly as it was (filters live in its URL) when we got
   // here in-app; fall back to a fresh queue on a cold deep-link/reload.
@@ -27,6 +34,27 @@ export function DetailPage() {
     if (location.key !== 'default') navigate(-1)
     else navigate('/')
   }
+
+  // j/k walk the ranked order the queue published — moving to the next conversation.
+  const goToOffset = (delta: number) => {
+    if (!id) return
+    const index = orderedIds.indexOf(id)
+    if (index === -1) return
+    const target = orderedIds[index + delta]
+    if (target) navigate(`/c/${target}`)
+  }
+
+  useShortcuts({
+    Escape: goBack,
+    j: () => goToOffset(1),
+    ArrowDown: () => goToOffset(1),
+    k: () => goToOffset(-1),
+    ArrowUp: () => goToOffset(-1),
+    a: () => conversation && actions.assign(conversation.id),
+    r: () => conversation && actions.resolve(conversation.id),
+    s: () => conversation && setSnoozeToken((token) => (token ?? 0) + 1),
+    u: () => undoLatest(),
+  })
 
   return (
     <div className="min-h-screen bg-paper text-ink">
@@ -65,7 +93,7 @@ export function DetailPage() {
             />
           ) : conversation ? (
             <NowProvider>
-              <LoadedDetail conversation={conversation} />
+              <LoadedDetail conversation={conversation} snoozeOpenToken={snoozeToken} />
             </NowProvider>
           ) : null}
         </div>
@@ -76,7 +104,13 @@ export function DetailPage() {
   )
 }
 
-function LoadedDetail({ conversation }: { conversation: Conversation }) {
+function LoadedDetail({
+  conversation,
+  snoozeOpenToken,
+}: {
+  conversation: Conversation
+  snoozeOpenToken: number | undefined
+}) {
   const { customer, channel, subject, status, escalation, messages } = conversation
 
   return (
@@ -102,7 +136,7 @@ function LoadedDetail({ conversation }: { conversation: Conversation }) {
       <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-start">
         <div className="flex min-w-0 flex-1 flex-col">
           <Transcript messages={messages} customerName={customer.name} />
-          <ActionBar conversation={conversation} />
+          <ActionBar conversation={conversation} snoozeOpenToken={snoozeOpenToken} />
         </div>
         <aside className="w-full shrink-0 space-y-4 lg:sticky lg:top-28 lg:w-80">
           <HandoffCard escalation={escalation} />

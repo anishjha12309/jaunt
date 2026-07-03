@@ -24,6 +24,12 @@ async function handleResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     throw new ApiError(response.status, await parseErrorMessage(response))
   }
+  // A non-JSON body means the request bypassed the MSW worker and hit the dev
+  // server (which returns index.html) — usually after a hard refresh. Surface an
+  // actionable message instead of a raw "Unexpected token '<'" JSON parse error.
+  if (!(response.headers.get('content-type') ?? '').includes('application/json')) {
+    throw new ApiError(response.status, 'Mock API unavailable — reload the page to start the service worker.')
+  }
   return response.json() as Promise<T>
 }
 

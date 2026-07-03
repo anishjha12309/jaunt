@@ -53,6 +53,15 @@ export function dismissToast(id: string): void {
   emit()
 }
 
+/** Fires the newest live "Undo" toast — the `u` keyboard shortcut. */
+export function undoLatest(): void {
+  const target = [...items].reverse().find((item) => item.action?.label === 'Undo')
+  if (target?.action) {
+    target.action.onClick()
+    dismissToast(target.id)
+  }
+}
+
 export function showToast(message: string, options: ToastOptions = {}): string {
   const id = `toast-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
   items = [...items, { id, message, tone: options.tone ?? 'neutral', action: options.action }]

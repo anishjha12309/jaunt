@@ -6,9 +6,11 @@ import { useTriageActions } from '@/features/actions/useTriageActions'
 
 interface ActionBarProps {
   conversation: Conversation
+  /** Bumped by the detail `s` shortcut to open the snooze menu. */
+  snoozeOpenToken?: number
 }
 
-export function ActionBar({ conversation }: ActionBarProps) {
+export function ActionBar({ conversation, snoozeOpenToken }: ActionBarProps) {
   const actions = useTriageActions()
   const { id, status, assigneeId } = conversation
   const busy = actions.isPending
@@ -33,6 +35,7 @@ export function ActionBar({ conversation }: ActionBarProps) {
             variant="button"
             align="left"
             disabled={busy}
+            openToken={snoozeOpenToken}
             onSnooze={(minutes) => actions.snooze(id, minutes)}
           />
         </>

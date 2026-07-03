@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
 import { Toaster } from '@/components/Toaster'
+import { ShortcutsProvider } from '@/features/shortcuts/ShortcutsProvider'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,7 +17,7 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
+      <ShortcutsProvider>{children}</ShortcutsProvider>
       <Toaster />
     </QueryClientProvider>
   )

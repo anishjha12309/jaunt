@@ -8,6 +8,8 @@ interface SnoozeMenuProps {
   variant?: 'icon' | 'button'
   align?: 'left' | 'right'
   disabled?: boolean
+  /** Bump to a new value to open the menu from a keyboard shortcut (the `s` binding). */
+  openToken?: number
 }
 
 interface SnoozeOption {
@@ -22,7 +24,13 @@ function minutesUntilTomorrow9am(from: Date): number {
   return Math.max(1, Math.round((target.getTime() - from.getTime()) / 60_000))
 }
 
-export function SnoozeMenu({ onSnooze, variant = 'icon', align = 'right', disabled }: SnoozeMenuProps) {
+export function SnoozeMenu({
+  onSnooze,
+  variant = 'icon',
+  align = 'right',
+  disabled,
+  openToken,
+}: SnoozeMenuProps) {
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(0)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -34,6 +42,13 @@ export function SnoozeMenu({ onSnooze, variant = 'icon', align = 'right', disabl
     if (returnFocus) triggerRef.current?.focus()
   }
   usePopoverDismiss(containerRef, open, close)
+
+  // Open on demand when the `s` shortcut bumps the token. The token is `undefined`
+  // until the first press, so mounting never opens the menu (even under StrictMode's
+  // double-invoked effects).
+  useEffect(() => {
+    if (openToken !== undefined) setOpen(true)
+  }, [openToken])
 
   // Computed each render so "Tomorrow 9 AM" is always relative to the current time.
   const options: SnoozeOption[] = [
