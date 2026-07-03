@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { AppFooter } from '@/app/AppFooter'
 import { Badge } from '@/components/Badge'
@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { GlassNav } from '@/components/GlassNav'
 import type { Conversation } from '@/api/types'
 import { CHANNEL_LABEL, STATUS_LABEL, STATUS_TONE, TIER_LABEL } from '@/lib/labels'
+import { useFadeIn } from '@/lib/motion'
 import { undoLatest } from '@/components/toastStore'
 import { FailureToggle } from '@/features/actions/FailureToggle'
 import { useTriageActions } from '@/features/actions/useTriageActions'
@@ -112,9 +113,11 @@ function LoadedDetail({
   snoozeOpenToken: number | undefined
 }) {
   const { customer, channel, subject, status, escalation, messages } = conversation
+  const rootRef = useRef<HTMLDivElement>(null)
+  useFadeIn(rootRef)
 
   return (
-    <>
+    <div ref={rootRef}>
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1 className="truncate text-section font-semibold tracking-tight text-ink">
@@ -143,6 +146,6 @@ function LoadedDetail({
           <CustomerSidebar conversation={conversation} />
         </aside>
       </div>
-    </>
+    </div>
   )
 }

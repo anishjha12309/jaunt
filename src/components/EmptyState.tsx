@@ -6,13 +6,16 @@ interface EmptyStateProps {
   body?: string
   action?: ReactNode
   className?: string
+  /** Drop the card chrome so a backdrop can show through (queue-clear celebration). */
+  bare?: boolean
 }
 
-export function EmptyState({ title, body, action, className }: EmptyStateProps) {
+export function EmptyState({ title, body, action, className, bare = false }: EmptyStateProps) {
   return (
     <div
       className={cn(
-        'flex flex-col items-center justify-center rounded-card border border-hairline bg-surface px-8 py-16 text-center',
+        'flex flex-col items-center justify-center px-8 py-16 text-center',
+        !bare && 'rounded-card border border-hairline bg-surface',
         className,
       )}
     >

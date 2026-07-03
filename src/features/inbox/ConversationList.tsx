@@ -1,5 +1,9 @@
 import { useEffect, useRef } from 'react'
+import gsap from 'gsap'
 import { cn } from '@/lib/cn'
+import { useLenis } from '@/app/lenisContext'
+import { useStaggerIn } from '@/lib/motion'
+import { prefersReducedMotion } from '@/lib/reducedMotion'
 import type { QueueFilters } from '@/api/types'
 import { ConversationRow } from '@/features/inbox/ConversationRow'
 import type { RankedConversation } from '@/features/inbox/useQueue'
@@ -20,6 +24,9 @@ interface ConversationListProps {
   snoozeTarget: SnoozeTarget | null
 }
 
+// pt-28 clearance so a scrolled-to row never hides under the fixed nav pill.
+const NAV_CLEARANCE = 112
+
 export function ConversationList({
   ranked,
   filters,
@@ -28,20 +35,50 @@ export function ConversationList({
   onHover,
   snoozeTarget,
 }: ConversationListProps) {
+  const listRef = useRef<HTMLUListElement>(null)
   const rowRefs = useRef<Map<string, HTMLLIElement>>(new Map())
+  const collapseRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const collapsing = useRef<Set<string>>(new Set())
+  const lenis = useLenis()
 
-  // Keep the keyboard-selected row on screen (mouse hover lands on visible rows, so
-  // `nearest` is a no-op there). Phase 8 swaps this for lenis.scrollTo.
+  useStaggerIn(listRef)
+
+  // GSAP resolve-collapse (replaces the CSS grid transition): a row entering `exiting`
+  // shrinks to nothing; one cancelled before it unmounts springs back open.
+  useEffect(() => {
+    const reduce = prefersReducedMotion()
+    for (const id of exit.exiting) {
+      if (collapsing.current.has(id)) continue
+      collapsing.current.add(id)
+      const el = collapseRefs.current.get(id)
+      if (el) gsap.to(el, { height: 0, opacity: 0, duration: reduce ? 0 : 0.2, ease: 'power2.in' })
+    }
+    for (const id of [...collapsing.current]) {
+      if (exit.exiting.has(id)) continue
+      collapsing.current.delete(id)
+      const el = collapseRefs.current.get(id)
+      if (el) gsap.to(el, { height: 'auto', opacity: 1, duration: reduce ? 0 : 0.2, ease: 'power2.out' })
+    }
+  }, [exit.exiting])
+
+  // Keep the keyboard-selected row on screen. Hover lands on already-visible rows, so we
+  // only scroll when the row is actually clipped — otherwise hovering would jump the page.
   const selectedId = ranked[selectedIndex]?.conversation.id
   useEffect(() => {
-    if (selectedId) rowRefs.current.get(selectedId)?.scrollIntoView({ block: 'nearest' })
-  }, [selectedId])
+    if (!selectedId) return
+    const el = rowRefs.current.get(selectedId)
+    if (!el) return
+    const rect = el.getBoundingClientRect()
+    const fullyVisible = rect.top >= NAV_CLEARANCE && rect.bottom <= window.innerHeight
+    if (fullyVisible) return
+    if (lenis) lenis.scrollTo(el, { offset: -NAV_CLEARANCE })
+    else el.scrollIntoView({ block: 'nearest' })
+  }, [selectedId, lenis])
 
   return (
-    <ul className="divide-y divide-hairline rounded-card border border-hairline bg-surface">
+    <ul ref={listRef} className="divide-y divide-hairline rounded-card border border-hairline bg-surface">
       {ranked.map(({ conversation, bucket }, index) => {
         if (exit.hidden.has(conversation.id)) return null
-        const isExiting = exit.exiting.has(conversation.id)
         const isSelected = index === selectedIndex
         return (
           <li
@@ -55,14 +92,13 @@ export function ConversationList({
             className="group relative scroll-mt-28"
           >
             <div
-              className={cn(
-                'grid transition-[grid-template-rows,opacity] duration-200 ease-out',
-                isExiting ? 'grid-rows-[0fr] opacity-0' : 'grid-rows-[1fr] opacity-100',
-              )}
+              ref={(el) => {
+                if (el) collapseRefs.current.set(conversation.id, el)
+                else collapseRefs.current.delete(conversation.id)
+              }}
+              className="overflow-hidden"
             >
-              <div className="overflow-hidden">
-                <ConversationRow conversation={conversation} bucket={bucket} selected={isSelected} />
-              </div>
+              <ConversationRow conversation={conversation} bucket={bucket} selected={isSelected} />
             </div>
             <RowQuickActions
               conversation={conversation}

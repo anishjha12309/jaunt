@@ -1,4 +1,6 @@
+import { useRef } from 'react'
 import { cn } from '@/lib/cn'
+import { useCountUp } from '@/lib/motion'
 import type { QueueSummary } from '@/api/types'
 
 interface SummaryStripProps {
@@ -16,10 +18,14 @@ export function SummaryStrip({ summary }: SummaryStripProps) {
 }
 
 function Stat({ label, value, critical = false }: { label: string; value?: number; critical?: boolean }) {
+  const valueRef = useRef<HTMLElement>(null)
+  useCountUp(valueRef, value)
+
   return (
     <div className="flex flex-col-reverse gap-1">
       <dt className="font-mono-label text-muted">{label}</dt>
       <dd
+        ref={valueRef}
         className={cn(
           'font-mono text-[28px] font-medium leading-none tabular-nums',
           critical && value ? 'text-critical' : 'text-ink',

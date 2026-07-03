@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
+import { useScrolled } from '@/lib/useScrolled'
 
 interface GlassNavProps {
   /** Tab filters (Phase 4). */
@@ -12,13 +13,18 @@ interface GlassNavProps {
 }
 
 export function GlassNav({ tabs, search, failureSlot, className }: GlassNavProps) {
+  const scrolled = useScrolled(8)
+
   return (
     <div className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4">
       <nav
         aria-label="Primary"
         className={cn(
-          'pointer-events-auto flex items-center gap-4 rounded-pill border border-white/50 bg-white/65 px-4 py-2',
-          'shadow-[0_4px_24px_rgb(27_27_24_/_0.10)] backdrop-blur-xl',
+          'pointer-events-auto flex items-center gap-4 rounded-pill border border-white/50 px-4 py-2',
+          'backdrop-blur-xl transition-[background-color,box-shadow,backdrop-filter] duration-200',
+          scrolled
+            ? 'bg-white/80 shadow-[0_8px_32px_rgb(27_27_24_/_0.16)] backdrop-blur-2xl'
+            : 'bg-white/65 shadow-[0_4px_24px_rgb(27_27_24_/_0.10)]',
           className,
         )}
       >
