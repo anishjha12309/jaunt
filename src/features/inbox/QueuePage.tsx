@@ -68,7 +68,7 @@ export function QueuePage() {
             />
           )
         ) : (
-          <ConversationList ranked={ranked} />
+          <ConversationList ranked={ranked} filters={filters} />
         )}
       </NowProvider>
     </PageShell>

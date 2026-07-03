@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { AppFooter } from '@/app/AppFooter'
 import { GlassNav } from '@/components/GlassNav'
+import { FailureToggle } from '@/features/actions/FailureToggle'
 
 interface PageShellProps {
   title: string
@@ -21,7 +22,7 @@ export function PageShell({ title, children, navTabs, navSearch, titleAside }: P
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <GlassNav tabs={navTabs} search={navSearch} />
+      <GlassNav tabs={navTabs} search={navSearch} failureSlot={<FailureToggle />} />
       <main className="mx-auto max-w-5xl px-6 pb-24 pt-28">
         <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <h1 className="text-page-title font-semibold tracking-tight">{title}</h1>

@@ -1,50 +1,15 @@
 import { delay, http, HttpResponse } from 'msw'
-import type {
-  Conversation,
-  QueueResponse,
-  QueueSummary,
-  TabCounts,
-  TriageRequestBody,
-} from '@/api/types'
+import type { Conversation, QueueResponse, QueueSummary, TabCounts, TriageRequestBody } from '@/api/types'
 import { conversations as seedConversations, CURRENT_AGENT_ID } from '@/mocks/data'
 import { isFailureModeEnabled, setFailureMode } from '@/mocks/failureFlag'
+import { isBreached, matchesQuery, matchesStatus, matchesTab } from '@/lib/queueFilter'
+import { applyTriageAction } from '@/lib/triage'
 
 const db: Conversation[] = seedConversations
 
 function randomDelay(): Promise<void> {
   const ms = Math.floor(Math.random() * (500 - 200 + 1)) + 200
   return delay(ms)
-}
-
-function isBreached(conversation: Conversation, now: number): boolean {
-  return conversation.status === 'open' && new Date(conversation.slaDueAt).getTime() <= now
-}
-
-function matchesTab(conversation: Conversation, tab: string, now: number): boolean {
-  switch (tab) {
-    case 'mine':
-      return conversation.assigneeId === CURRENT_AGENT_ID
-    case 'unassigned':
-      return conversation.assigneeId === null
-    case 'breached':
-      return isBreached(conversation, now)
-    default:
-      return true
-  }
-}
-
-function matchesStatus(conversation: Conversation, status: string): boolean {
-  if (status === 'all') return true
-  return conversation.status === status
-}
-
-function matchesQuery(conversation: Conversation, q: string): boolean {
-  if (!q) return true
-  const needle = q.toLowerCase()
-  return (
-    conversation.customer.name.toLowerCase().includes(needle) ||
-    conversation.subject.toLowerCase().includes(needle)
-  )
 }
 
 /** Counts for each tab within the current status+search filter (tab itself excluded). */
@@ -66,27 +31,6 @@ function computeSummary(now: number): QueueSummary {
   }
 }
 
-function applyTriageAction(conversation: Conversation, body: TriageRequestBody, now: number): Conversation {
-  switch (body.action) {
-    case 'assign':
-      return { ...conversation, assigneeId: CURRENT_AGENT_ID }
-    case 'resolve':
-      return { ...conversation, status: 'resolved', snoozedUntil: null }
-    case 'snooze': {
-      const minutes = body.snoozeMinutes ?? 60
-      return {
-        ...conversation,
-        status: 'snoozed',
-        snoozedUntil: new Date(now + minutes * 60_000).toISOString(),
-      }
-    }
-    case 'reopen':
-      return { ...conversation, status: 'open', snoozedUntil: null }
-    default:
-      return conversation
-  }
-}
-
 export const handlers = [
   http.get('/api/conversations', async ({ request }) => {
     await randomDelay()
@@ -100,7 +44,7 @@ export const handlers = [
     const scoped = db.filter(
       (conversation) => matchesStatus(conversation, status) && matchesQuery(conversation, q),
     )
-    const items = scoped.filter((conversation) => matchesTab(conversation, tab, now))
+    const items = scoped.filter((conversation) => matchesTab(conversation, tab, now, CURRENT_AGENT_ID))
 
     const response: QueueResponse = {
       items,
@@ -133,7 +77,7 @@ export const handlers = [
 
     const body = (await request.json()) as TriageRequestBody
     const current = db[index] as Conversation
-    const updated = applyTriageAction(current, body, Date.now())
+    const updated = applyTriageAction(current, body.action, Date.now(), CURRENT_AGENT_ID, body.snoozeMinutes)
     db[index] = updated
 
     return HttpResponse.json(updated)

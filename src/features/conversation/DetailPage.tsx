@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/EmptyState'
 import { GlassNav } from '@/components/GlassNav'
 import type { Conversation } from '@/api/types'
 import { CHANNEL_LABEL, STATUS_LABEL, STATUS_TONE, TIER_LABEL } from '@/lib/labels'
+import { FailureToggle } from '@/features/actions/FailureToggle'
 import { NowProvider } from '@/features/inbox/NowProvider'
 import { ActionBar } from '@/features/conversation/ActionBar'
 import { CustomerSidebar } from '@/features/conversation/CustomerSidebar'
@@ -29,7 +30,7 @@ export function DetailPage() {
 
   return (
     <div className="min-h-screen bg-paper text-ink">
-      <GlassNav />
+      <GlassNav failureSlot={<FailureToggle />} />
       <main className="mx-auto max-w-5xl px-6 pb-24 pt-28">
         <button
           type="button"
@@ -101,7 +102,7 @@ function LoadedDetail({ conversation }: { conversation: Conversation }) {
       <div className="mt-8 flex flex-col gap-8 lg:flex-row lg:items-start">
         <div className="flex min-w-0 flex-1 flex-col">
           <Transcript messages={messages} customerName={customer.name} />
-          <ActionBar status={status} />
+          <ActionBar conversation={conversation} />
         </div>
         <aside className="w-full shrink-0 space-y-4 lg:sticky lg:top-28 lg:w-80">
           <HandoffCard escalation={escalation} />

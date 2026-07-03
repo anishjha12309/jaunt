@@ -8,7 +8,7 @@ export type EscalationReason =
   | 'human_requested'
 export type Sentiment = 'angry' | 'frustrated' | 'neutral' | 'positive'
 export type MessageAuthor = 'customer' | 'ai' | 'agent'
-export type TriageAction = 'assign' | 'resolve' | 'snooze' | 'reopen'
+export type TriageAction = 'assign' | 'unassign' | 'resolve' | 'snooze' | 'reopen'
 export type QueueTab = 'all' | 'mine' | 'unassigned' | 'breached'
 
 export interface Customer {

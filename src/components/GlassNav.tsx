@@ -2,14 +2,16 @@ import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
 interface GlassNavProps {
-  /** Filled in Phase 4 with tab filters. */
+  /** Tab filters (Phase 4). */
   tabs?: ReactNode
-  /** Filled in Phase 4 with the search trigger. */
+  /** Search trigger (Phase 4). */
   search?: ReactNode
+  /** Failure-simulator control (Phase 6), injected so this stays feature-agnostic. */
+  failureSlot?: ReactNode
   className?: string
 }
 
-export function GlassNav({ tabs, search, className }: GlassNavProps) {
+export function GlassNav({ tabs, search, failureSlot, className }: GlassNavProps) {
   return (
     <div className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4">
       <nav
@@ -24,7 +26,7 @@ export function GlassNav({ tabs, search, className }: GlassNavProps) {
         {tabs && <span aria-hidden="true" className="h-5 w-px bg-hairline" />}
         {tabs}
         {search}
-        <FailureDot />
+        {failureSlot}
       </nav>
     </div>
   )
@@ -36,16 +38,5 @@ function Wordmark() {
       <span aria-hidden="true" className="h-4 w-4 rounded-[5px] bg-blue" />
       <span className="text-[15px] font-semibold tracking-tight text-ink">Inbox</span>
     </span>
-  )
-}
-
-function FailureDot() {
-  // Gray in Phase 2; wired to the failure simulator (turns critical-red) in Phase 6.
-  return (
-    <span
-      className="ml-1 h-2.5 w-2.5 rounded-full bg-muted/40"
-      title="Failure simulator: off"
-      aria-hidden="true"
-    />
   )
 }
