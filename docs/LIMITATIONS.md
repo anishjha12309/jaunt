@@ -11,6 +11,9 @@ Honest gaps — what a real build would tackle next.
   is no auth, no multi-agent presence, no multi-tenant.
 - **No list virtualization.** 42 rows render fine; a real queue of thousands would need
   windowing. Left out to keep the code readable.
+- **The mock worker can idle out.** Browsers terminate idle service workers, and the
+  restarted worker forgets the tab. A bypassed request now re-activates the worker and
+  retries once; the "reload the page" error remains as the last-resort fallback.
 - **Failure flag is module state.** The simulator toggle lives in the mock layer's
   memory, so a full page reload resets it to off.
 - **Undo is best-effort.** Undo fires the inverse action; if that write itself fails it
