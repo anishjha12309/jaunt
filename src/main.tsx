@@ -5,6 +5,7 @@ import './styles/index.css'
 
 const RELOAD_FLAG = 'msw-reloaded'
 const READY_PROBE_ATTEMPTS = 5
+const EXTENDED_PROBE_ATTEMPTS = 25
 const READY_PROBE_DELAY_MS = 150
 
 // A bypassed request (worker not yet controlling the page) hits Vite's dev-server
@@ -16,20 +17,25 @@ async function isMockReady(): Promise<boolean> {
   return (response.headers.get('content-type') ?? '').includes('application/json')
 }
 
+async function pollUntilReady(attempts: number): Promise<boolean> {
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    if (await isMockReady()) return true
+    await new Promise((resolve) => setTimeout(resolve, READY_PROBE_DELAY_MS))
+  }
+  return false
+}
+
 async function enableMocking(): Promise<void> {
   const { worker } = await import('@/mocks/browser')
   await worker.start({ onUnhandledRequest: 'bypass' })
 
-  for (let attempt = 0; attempt < READY_PROBE_ATTEMPTS; attempt += 1) {
-    if (await isMockReady()) {
-      sessionStorage.removeItem(RELOAD_FLAG)
-      return
-    }
-    await new Promise((resolve) => setTimeout(resolve, READY_PROBE_DELAY_MS))
+  if (await pollUntilReady(READY_PROBE_ATTEMPTS)) {
+    sessionStorage.removeItem(RELOAD_FLAG)
+    return
   }
 
-  // Still bypassed after the probe window — a stale worker left over from a hard
-  // refresh. One normal reload lets the active worker claim the page; the
+  // Still bypassed after the short probe window — a stale worker left over from a
+  // hard refresh. One normal reload lets the active worker claim the page; the
   // sessionStorage guard prevents a reload loop if that ever fails.
   if (!sessionStorage.getItem(RELOAD_FLAG)) {
     sessionStorage.setItem(RELOAD_FLAG, '1')
@@ -37,6 +43,11 @@ async function enableMocking(): Promise<void> {
     await new Promise(() => {}) // hold render until the reload takes over
   }
   sessionStorage.removeItem(RELOAD_FLAG)
+
+  // Already reloaded once — a first-ever service-worker install/activation can
+  // still outlast the short window above, so give it a much longer runway before
+  // finally rendering into the app's own "mock unavailable" error state.
+  await pollUntilReady(EXTENDED_PROBE_ATTEMPTS)
 }
 
 const rootElement = document.getElementById('root')

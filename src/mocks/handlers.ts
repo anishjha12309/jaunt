@@ -64,9 +64,13 @@ export const handlers = [
   }),
 
   http.patch('/api/conversations/:id', async ({ params, request }) => {
+    // Read the toggle before the delay so the outcome is decided at the moment the
+    // request was dispatched, not whatever the flag happens to be once it resolves —
+    // otherwise flipping the toggle mid-flight can flip an unrelated request's result.
+    const shouldFail = isFailureModeEnabled()
     await randomDelay()
 
-    if (isFailureModeEnabled()) {
+    if (shouldFail) {
       return HttpResponse.json({ message: 'Simulated network failure' }, { status: 500 })
     }
 
