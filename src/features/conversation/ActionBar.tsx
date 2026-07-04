@@ -16,7 +16,7 @@ export function ActionBar({ conversation, snoozeOpenToken }: ActionBarProps) {
   const busy = actions.isPending
 
   return (
-    <div className="sticky bottom-6 mt-8 flex items-center gap-2 rounded-card border border-hairline bg-surface/90 p-3 shadow-soft backdrop-blur-sm">
+    <div className="sticky bottom-6 mt-8 flex flex-wrap items-center gap-2 rounded-card border border-hairline bg-surface/90 p-3 shadow-soft backdrop-blur-sm">
       {status === 'resolved' ? (
         <Button variant="primary" disabled={busy} onClick={() => actions.reopen(id)}>
           Reopen

@@ -17,11 +17,11 @@ export function GlassNav({ tabs, search, failureSlot, className }: GlassNavProps
   const scrolled = useScrolled(8)
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-4">
+    <div className="pointer-events-none fixed inset-x-0 top-4 z-50 flex justify-center px-3 sm:px-4">
       <nav
         aria-label="Primary"
         className={cn(
-          'pointer-events-auto flex items-center gap-4 rounded-pill border border-white/50 px-4 py-2',
+          'pointer-events-auto flex max-w-full items-center gap-2 rounded-pill border border-white/50 px-3 py-2 sm:gap-4 sm:px-4',
           'backdrop-blur-xl transition-[background-color,box-shadow,backdrop-filter] duration-200',
           scrolled
             ? 'bg-white/80 shadow-[0_8px_32px_rgb(27_27_24_/_0.16)] backdrop-blur-2xl'
@@ -30,10 +30,11 @@ export function GlassNav({ tabs, search, failureSlot, className }: GlassNavProps
         )}
       >
         <Wordmark />
-        {tabs && <span aria-hidden="true" className="h-5 w-px bg-hairline" />}
-        {tabs}
-        {search}
-        {failureSlot}
+        {tabs && <span aria-hidden="true" className="hidden h-5 w-px bg-hairline sm:block" />}
+        {/* Below sm the tab strip scrolls horizontally so the pill never outgrows the viewport. */}
+        {tabs && <div className="no-scrollbar min-w-0 overflow-x-auto sm:overflow-visible">{tabs}</div>}
+        {search && <div className="shrink-0">{search}</div>}
+        {failureSlot && <div className="shrink-0">{failureSlot}</div>}
       </nav>
     </div>
   )
@@ -41,7 +42,7 @@ export function GlassNav({ tabs, search, failureSlot, className }: GlassNavProps
 
 function Wordmark() {
   return (
-    <span className="flex items-center gap-2 pr-1">
+    <span className="flex shrink-0 items-center gap-2 pr-1">
       <Logo className="h-4 w-4 text-blue" />
       <span className="text-[15px] font-semibold tracking-tight text-ink">Jaunt</span>
     </span>

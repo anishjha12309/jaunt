@@ -71,6 +71,15 @@
   font-size: var(--text-meta);
 }
 
+/* Hide the scrollbar on the mobile nav's horizontally-scrollable tab strip. */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 @keyframes toast-in {
   from {
     opacity: 0;

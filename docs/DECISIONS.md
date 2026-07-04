@@ -22,9 +22,12 @@ Every action applies immediately and offers a 5-second Undo rather than blocking
 a confirm dialog. Triage is high-volume; a confirm would tax every keystroke. Failed
 writes roll back automatically with a Retry toast, so "instant" is never risky.
 
-## Desktop-only
-This is an agent's primary work surface at a desk. Below 768px is out of scope; the
-layout targets 768–1440px and up.
+## Desktop-first, but responsive
+An agent's primary surface is a desk, so the layout is tuned for 768–1440px and up and
+the keyboard model assumes it. But a broken phone render reads as unfinished, so the core
+flow now reflows down to ~360px: the nav's tab strip scrolls horizontally, queue rows drop
+their pointer-only quick-actions and lower-signal columns (CSAT, sentiment), and the detail
+view stacks its transcript above the sidebar. Touch users tap a row to open and act.
 
 ## MSW everywhere
 The mock layer runs in the browser in dev and in the built demo, so the app is fully

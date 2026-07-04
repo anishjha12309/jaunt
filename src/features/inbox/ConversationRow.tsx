@@ -41,7 +41,7 @@ export function ConversationRow({ conversation, bucket, selected = false }: Conv
       to={`/c/${conversation.id}`}
       data-selected={selected || undefined}
       className={cn(
-        'group relative flex items-center gap-4 py-3 pl-5 pr-4 outline-none transition-colors',
+        'group relative flex items-center gap-2.5 py-3 pl-4 pr-3 outline-none transition-colors sm:gap-4 sm:pl-5 sm:pr-4',
         'hover:bg-ink/[0.03] focus-visible:bg-ink/[0.03]',
         'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-blue',
         selected && 'bg-[var(--color-selected-wash)]',
@@ -58,13 +58,14 @@ export function ConversationRow({ conversation, bucket, selected = false }: Conv
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate text-[15px] font-medium text-ink">{customer.name}</span>
-          <Badge tone={customer.tier === 'enterprise' ? 'blue' : 'neutral'}>
+          <Badge tone={customer.tier === 'enterprise' ? 'blue' : 'neutral'} className="shrink-0">
             {TIER_LABEL[customer.tier]}
           </Badge>
-          <span className="truncate text-[13px] text-muted">{customer.company}</span>
+          {/* Company is the lowest-signal field here and repeats in the detail view — drop it on mobile so the name keeps its width. */}
+          <span className="hidden truncate text-[13px] text-muted sm:block">{customer.company}</span>
         </div>
         <div className="mt-1 flex items-center gap-2">
-          <Chip tone={REASON_TONE[escalation.reason]} lightning>
+          <Chip tone={REASON_TONE[escalation.reason]} lightning className="shrink-0 whitespace-nowrap">
             {REASON_LABEL[escalation.reason]}
           </Chip>
           <span className="truncate text-body text-muted">{subject}</span>
@@ -77,7 +78,7 @@ export function ConversationRow({ conversation, bucket, selected = false }: Conv
       </div>
 
       {escalation.csat !== null && (
-        <span className={cn('font-mono text-[11px] tabular-nums', csatTone(escalation.csat))}>
+        <span className={cn('hidden font-mono text-[11px] tabular-nums sm:inline', csatTone(escalation.csat))}>
           CSAT {escalation.csat}
         </span>
       )}

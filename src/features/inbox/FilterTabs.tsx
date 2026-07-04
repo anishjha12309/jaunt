@@ -16,7 +16,7 @@ const TABS: ReadonlyArray<{ id: QueueTab; label: string }> = [
 
 export function FilterTabs({ active, counts, onSelect }: FilterTabsProps) {
   return (
-    <div role="tablist" aria-label="Queue filters" className="flex items-center gap-0.5">
+    <div role="tablist" aria-label="Queue filters" className="flex w-max items-center gap-0.5">
       {TABS.map((tab) => {
         const isActive = tab.id === active
         const count = counts?.[tab.id]

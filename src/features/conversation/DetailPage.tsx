@@ -71,7 +71,7 @@ export function DetailPage() {
   return (
     <div className="min-h-screen bg-paper text-ink">
       <GlassNav failureSlot={<FailureToggle />} />
-      <main className="mx-auto max-w-5xl px-6 pb-24 pt-28">
+      <main className="mx-auto max-w-5xl px-4 pb-24 pt-28 sm:px-6">
         <button
           type="button"
           onClick={goBack}

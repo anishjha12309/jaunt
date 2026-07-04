@@ -58,7 +58,8 @@ export function RowQuickActions({
   return (
     <div
       className={cn(
-        'flex items-center gap-0.5 rounded-full border border-hairline bg-surface px-1 py-1 shadow-soft',
+        // Pointer-only affordance: hidden on touch, where tapping the row opens the detail view to act.
+        'hidden items-center gap-0.5 rounded-full border border-hairline bg-surface px-1 py-1 shadow-soft sm:flex',
         className,
       )}
     >

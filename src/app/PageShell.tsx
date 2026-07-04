@@ -27,7 +27,7 @@ export function PageShell({ title, children, navTabs, navSearch, titleAside }: P
   return (
     <div className="min-h-screen bg-paper text-ink">
       <GlassNav tabs={navTabs} search={navSearch} failureSlot={<FailureToggle />} />
-      <main className="mx-auto max-w-5xl px-6 pb-24 pt-28">
+      <main className="mx-auto max-w-5xl px-4 pb-24 pt-28 sm:px-6">
         <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <h1
             ref={headingRef}

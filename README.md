@@ -19,7 +19,8 @@ npm run dev     # http://localhost:5173  (mock API runs in-browser via MSW)
 npm test        # priority + optimistic-mutation tests
 ```
 
-Desktop-only (≥ 768px). All data is a mock (MSW) — no backend, no env vars.
+Desktop-first (tuned for ≥ 768px) but responsive down to mobile. All data is a mock
+(MSW) — no backend, no env vars.
 
 ## Keyboard
 
