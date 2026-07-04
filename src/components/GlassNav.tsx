@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
+import { Logo } from '@/components/Logo'
 import { useScrolled } from '@/lib/useScrolled'
 
 interface GlassNavProps {
@@ -41,8 +42,8 @@ export function GlassNav({ tabs, search, failureSlot, className }: GlassNavProps
 function Wordmark() {
   return (
     <span className="flex items-center gap-2 pr-1">
-      <span aria-hidden="true" className="h-4 w-4 rounded-[5px] bg-blue" />
-      <span className="text-[15px] font-semibold tracking-tight text-ink">Inbox</span>
+      <Logo className="h-4 w-4 text-blue" />
+      <span className="text-[15px] font-semibold tracking-tight text-ink">Jaunt</span>
     </span>
   )
 }

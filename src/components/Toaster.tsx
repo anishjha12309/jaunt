@@ -1,5 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import gsap from 'gsap'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '@/lib/cn'
 import { prefersReducedMotion } from '@/lib/reducedMotion'
 import {
@@ -11,8 +10,8 @@ import {
 
 /**
  * Toast mount point. The `aria-live` region has been here since Phase 2; Phase 6 wired it
- * to the store and its action buttons. Phase 8 adds a 150ms GSAP enter/exit — a departed
- * toast lingers in local `leaving` state just long enough to animate out.
+ * to the store and its action buttons. A departed toast lingers in local `leaving` state
+ * just long enough to play its CSS exit transition before it's dropped for good.
  */
 const TONE_CLASSES: Record<ToastTone, string> = {
   neutral: 'bg-panel text-panel-text',
@@ -80,44 +79,25 @@ function ToastCard({
   exiting: boolean
   onExited: () => void
 }) {
-  const ref = useRef<HTMLDivElement>(null)
   const exitedRef = useRef(onExited)
   exitedRef.current = onExited
 
-  useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const mm = gsap.matchMedia()
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.from(el, { y: 12, opacity: 0, duration: 0.15, ease: 'power2.out' })
-    })
-    return () => mm.revert()
-  }, [])
-
+  // Reduced motion never fires a transition, so the CSS exit's onTransitionEnd never
+  // runs — leave immediately instead of lingering in `leaving` state forever.
   useEffect(() => {
-    if (!exiting) return
-    const el = ref.current
-    if (!el || prefersReducedMotion()) {
-      exitedRef.current()
-      return
-    }
-    const tween = gsap.to(el, {
-      y: 8,
-      opacity: 0,
-      duration: 0.15,
-      ease: 'power2.in',
-      onComplete: () => exitedRef.current(),
-    })
-    return () => {
-      tween.kill()
-    }
+    if (exiting && prefersReducedMotion()) exitedRef.current()
   }, [exiting])
 
   return (
     <div
-      ref={ref}
+      onTransitionEnd={(event) => {
+        if (exiting && event.propertyName === 'opacity') exitedRef.current()
+      }}
       className={cn(
         'pointer-events-auto flex max-w-md items-center gap-3 rounded-chip py-2.5 pl-4 pr-2.5 text-body shadow-soft',
+        'animate-[toast-in_150ms_ease-out] motion-reduce:animate-none',
+        'transition-[transform,opacity] duration-150 ease-in motion-reduce:transition-none',
+        exiting ? 'translate-y-2 opacity-0' : 'translate-y-0 opacity-100',
         TONE_CLASSES[toast.tone],
       )}
     >

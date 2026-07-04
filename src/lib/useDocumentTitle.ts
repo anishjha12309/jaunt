@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-const BASE_TITLE = 'Conversation Inbox'
+const BASE_TITLE = 'Jaunt'
 
 /** Sets `document.title` per route so the browser tab and history reflect the current view. */
 export function useDocumentTitle(title?: string): void {

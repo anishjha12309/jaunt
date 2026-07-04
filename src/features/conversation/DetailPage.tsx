@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 import { AppFooter } from '@/app/AppFooter'
 import { Badge } from '@/components/Badge'
@@ -9,7 +9,6 @@ import type { Conversation } from '@/api/types'
 import { CHANNEL_LABEL, STATUS_LABEL, STATUS_TONE, TIER_LABEL } from '@/lib/labels'
 import { useDocumentTitle } from '@/lib/useDocumentTitle'
 import { useFocusOnMount } from '@/lib/useFocusOnMount'
-import { useFadeIn } from '@/lib/motion'
 import { undoLatest } from '@/components/toastStore'
 import { FailureToggle } from '@/features/actions/FailureToggle'
 import { useTriageActions } from '@/features/actions/useTriageActions'
@@ -125,12 +124,10 @@ function LoadedDetail({
   snoozeOpenToken: number | undefined
 }) {
   const { customer, channel, subject, status, escalation, messages } = conversation
-  const rootRef = useRef<HTMLDivElement>(null)
   const headingRef = useFocusOnMount<HTMLHeadingElement>()
-  useFadeIn(rootRef)
 
   return (
-    <div ref={rootRef}>
+    <div className="animate-[detail-in_250ms_ease-out] motion-reduce:animate-none">
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
           <h1

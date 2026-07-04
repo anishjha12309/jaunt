@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { PageShell } from '@/app/PageShell'
-import { AmbientBackdrop } from '@/components/AmbientBackdrop'
 import { Button } from '@/components/Button'
 import { EmptyState } from '@/components/EmptyState'
 import type { TriageAction } from '@/api/types'
@@ -93,14 +92,7 @@ export function QueuePage() {
       }
     >
       <NowProvider>
-        {summary && (
-          <div className="relative">
-            <AmbientBackdrop />
-            <div className="relative z-10">
-              <SummaryStrip summary={summary} />
-            </div>
-          </div>
-        )}
+        {summary && <SummaryStrip summary={summary} />}
         {isPending ? (
           <QueueSkeleton />
         ) : isError ? (
@@ -129,16 +121,10 @@ export function QueuePage() {
               }
             />
           ) : (
-            <div className="relative overflow-hidden rounded-card border border-hairline bg-surface">
-              <AmbientBackdrop />
-              <div className="relative z-10">
-                <EmptyState
-                  bare
-                  title="Queue clear 🎉"
-                  body="Nothing needs you right now. New escalations will land here as they arrive."
-                />
-              </div>
-            </div>
+            <EmptyState
+              title="Queue clear 🎉"
+              body="Nothing needs you right now. New escalations will land here as they arrive."
+            />
           )
         ) : (
           <ConversationList
