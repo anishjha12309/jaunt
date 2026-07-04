@@ -7,7 +7,9 @@ flow is keyboard-driven. It's a triage tool, not a chat client — agents reply 
 existing tool. Cuts: reply composer, bulk actions, mobile, virtualized lists — reasoning
 in [DECISIONS](docs/DECISIONS.md).
 
-![demo](docs/demo.gif) <!-- TODO: record a ~10s GIF: rank → open → resolve → undo -->
+**Live demo: [jaunt-anish.vercel.app](https://jaunt-anish.vercel.app)**
+
+![Rank the queue, open a conversation, resolve it, undo](docs/demo.gif)
 
 ## Run it
 
