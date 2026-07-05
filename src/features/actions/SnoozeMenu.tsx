@@ -116,6 +116,7 @@ export function SnoozeMenu({
           onKeyDown={onMenuKeyDown}
           className={cn(
             'absolute z-30 mt-1 w-44 overflow-hidden rounded-chip border border-hairline bg-surface py-1 shadow-soft',
+            'animate-[popover-in_150ms_ease-out] motion-reduce:animate-none',
             align === 'right' ? 'right-0' : 'left-0',
           )}
         >

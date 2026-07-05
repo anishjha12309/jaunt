@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react'
 import { cn } from '@/lib/cn'
-import { useLenis } from '@/app/lenisContext'
 import type { QueueFilters } from '@/api/types'
 import { ConversationRow } from '@/features/inbox/ConversationRow'
 import type { RankedConversation } from '@/features/inbox/useQueue'
@@ -33,7 +32,6 @@ export function ConversationList({
   snoozeTarget,
 }: ConversationListProps) {
   const rowRefs = useRef<Map<string, HTMLLIElement>>(new Map())
-  const lenis = useLenis()
 
   // Hovering must never itself scroll the page — near the top/bottom edge of the
   // viewport a partially-clipped row is still hoverable, so scrolling it into view
@@ -59,9 +57,8 @@ export function ConversationList({
     const rect = el.getBoundingClientRect()
     const fullyVisible = rect.top >= NAV_CLEARANCE && rect.bottom <= window.innerHeight
     if (fullyVisible) return
-    if (lenis) lenis.scrollTo(el, { offset: -NAV_CLEARANCE })
-    else el.scrollIntoView({ block: 'nearest' })
-  }, [selectedId, lenis])
+    el.scrollIntoView({ block: 'nearest' }) // rows carry scroll-mt for the fixed nav
+  }, [selectedId])
 
   return (
     <ul className="divide-y divide-hairline rounded-card border border-hairline bg-surface">

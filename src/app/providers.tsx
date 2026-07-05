@@ -1,6 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import type { ReactNode } from 'react'
-import { LenisProvider } from '@/app/LenisProvider'
 import { Toaster } from '@/components/Toaster'
 import { ShortcutsProvider } from '@/features/shortcuts/ShortcutsProvider'
 
@@ -18,9 +17,7 @@ interface ProvidersProps {
 export function Providers({ children }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
-      <LenisProvider>
-        <ShortcutsProvider>{children}</ShortcutsProvider>
-      </LenisProvider>
+      <ShortcutsProvider>{children}</ShortcutsProvider>
       <Toaster />
     </QueryClientProvider>
   )

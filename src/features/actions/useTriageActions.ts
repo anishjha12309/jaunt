@@ -84,6 +84,11 @@ export function useTriageActions(): TriageActions {
   // Synchronous lock: `isPending` flips a render too late to stop rapid keypresses
   // firing in the same tick, so we gate on a ref that resets when the write settles.
   const inFlightRef = useRef(false)
+  // Per-call callbacks ride on a ref, NOT on mutate(vars, {onError}) — TanStack Query
+  // drops mutate-scoped callbacks once the calling component unmounts, and a row's
+  // quick actions unmount mid-flight when the exit animation hides the row. The
+  // hook-level handlers below survive unmount, so they relay to whatever was stashed.
+  const perCallRef = useRef<ActOptions | undefined>(undefined)
 
   const mutation = useMutation<Conversation, Error, TriageVars, TriageContext>({
     mutationFn: ({ id, action, snoozeMinutes }) =>
@@ -128,6 +133,7 @@ export function useTriageActions(): TriageActions {
         queryClient.setQueryData(queryKeys.conversation(vars.id), context.previousDetail)
         for (const [key, data] of context.previousLists) queryClient.setQueryData(key, data)
       }
+      perCallRef.current?.onError?.()
       if (!vars.isUndo) {
         showToast(`Couldn't ${ACTION_VERB[vars.action]} — changes rolled back`, {
           tone: 'error',
@@ -138,6 +144,7 @@ export function useTriageActions(): TriageActions {
     },
 
     onSuccess: (_data, vars) => {
+      perCallRef.current?.onSuccess?.()
       if (vars.isUndo) return
       const inverse = inverseAction(vars.action)
       const label = SUCCESS_LABEL[vars.action]
@@ -155,6 +162,7 @@ export function useTriageActions(): TriageActions {
 
     onSettled: (_data, _error, vars) => {
       inFlightRef.current = false
+      perCallRef.current = undefined
       queryClient.invalidateQueries({ queryKey: queryKeys.conversation(vars.id) })
       queryClient.invalidateQueries({ queryKey: LIST_KEY })
     },
@@ -165,7 +173,8 @@ export function useTriageActions(): TriageActions {
   const fire = (vars: TriageVars, opts?: ActOptions) => {
     if (inFlightRef.current) return
     inFlightRef.current = true
-    mutation.mutate(vars, { onError: opts?.onError, onSuccess: opts?.onSuccess })
+    perCallRef.current = opts
+    mutation.mutate(vars)
   }
   fireRef.current = (vars) => fire(vars)
 

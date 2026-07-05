@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)'
 
-/** Imperative check for one-off decisions (Lenis init, three mount, tween duration). */
+/** Imperative check for one-off decisions outside render (e.g. skipping an exit transition). */
 export function prefersReducedMotion(): boolean {
   return typeof window !== 'undefined' && window.matchMedia(REDUCED_MOTION_QUERY).matches
 }

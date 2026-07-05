@@ -33,13 +33,13 @@ export function FailureToggle() {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full mt-2 w-64 rounded-card border border-hairline bg-surface p-4 text-left shadow-soft">
+        <div className="absolute right-0 top-full mt-2 w-64 rounded-card border border-hairline bg-surface p-4 text-left shadow-soft animate-[popover-in_150ms_ease-out] motion-reduce:animate-none">
           <p className="font-mono-label text-muted">Failure simulator</p>
           <div className="mt-3 flex items-center justify-between gap-3">
             <span className="text-body text-ink">Simulate API failures</span>
             <Switch checked={enabled} disabled={isBusy} onToggle={toggle} />
           </div>
-          <p className="mt-2 text-[12px] leading-snug text-muted">
+          <p className="mt-2 text-meta leading-snug text-muted">
             While on, write requests fail with 500 — use it to watch a triage action roll back.
           </p>
         </div>
@@ -73,8 +73,9 @@ function Switch({
     >
       <span
         className={cn(
-          'absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-soft transition-transform',
-          checked ? 'translate-x-4' : 'translate-x-0.5',
+          'absolute left-0.5 top-0.5 h-4 w-4 rounded-full bg-white shadow-soft',
+          'transition-transform motion-reduce:transition-none',
+          checked ? 'translate-x-4' : 'translate-x-0',
         )}
       />
     </button>

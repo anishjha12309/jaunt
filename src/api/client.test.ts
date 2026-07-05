@@ -23,6 +23,14 @@ function htmlResponse(): Response {
   })
 }
 
+// What a host WITHOUT a SPA rewrite (e.g. a bare static deploy) returns instead.
+function hostNotFoundResponse(): Response {
+  return new Response('The page could not be found', {
+    status: 404,
+    headers: { 'Content-Type': 'text/html' },
+  })
+}
+
 const fetchMock = vi.fn<typeof fetch>()
 
 beforeEach(() => {
@@ -61,6 +69,38 @@ describe('mock-worker revival on bypassed requests', () => {
     const [firstCall, secondCall] = fetchMock.mock.calls
     expect(secondCall).toEqual(firstCall)
     expect(secondCall?.[1]).toMatchObject({ method: 'PATCH', body: JSON.stringify({ status: 'resolved' }) })
+  })
+
+  it('re-activates the worker when the bypassed request 404s on the host', async () => {
+    fetchMock.mockResolvedValueOnce(hostNotFoundResponse()).mockResolvedValueOnce(jsonResponse({ id: 'conv-1' }))
+    reviveMock.mockResolvedValueOnce(true)
+
+    await expect(apiGet('/api/conversations/conv-1')).resolves.toEqual({ id: 'conv-1' })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it('keeps the actionable message when a host 404 cannot be revived', async () => {
+    fetchMock.mockResolvedValueOnce(hostNotFoundResponse())
+    reviveMock.mockResolvedValueOnce(false)
+
+    await expect(apiGet('/api/conversations')).rejects.toThrowError(
+      new ApiError(404, 'Mock API unavailable — reload the page to start the service worker.'),
+    )
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not revive on a real mock-layer JSON error', async () => {
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ message: 'Conversation not found' }), {
+        status: 404,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
+
+    await expect(apiGet('/api/conversations/nope')).rejects.toThrowError(
+      new ApiError(404, 'Conversation not found'),
+    )
+    expect(reviveMock).not.toHaveBeenCalled()
   })
 
   it('surfaces the actionable error when revival is impossible', async () => {

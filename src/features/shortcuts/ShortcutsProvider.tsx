@@ -43,8 +43,9 @@ export function ShortcutsProvider({ children }: { children: ReactNode }) {
         return
       }
       if (typing) return
-      // Let an open menu handle its own arrows/enter/escape.
-      if (event.target instanceof HTMLElement && event.target.closest('[role="menu"]')) return
+      // Let an open menu or listbox handle its own arrows/enter/escape.
+      if (event.target instanceof HTMLElement && event.target.closest('[role="menu"], [role="listbox"]'))
+        return
 
       const handler = keymapRef.current?.[event.key]
       if (handler) {

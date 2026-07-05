@@ -92,4 +92,30 @@ describe('useTriageActions', () => {
     // The optimistic 'resolved' has been reverted to the snapshotted 'open'.
     expect(client.getQueryData<Conversation>(detailKey('conv-2'))?.status).toBe('open')
   })
+
+  it('still runs the per-call onError when the caller unmounted mid-flight', async () => {
+    // A queue row's quick actions unmount once the exit animation hides the row —
+    // mutate-scoped callbacks are dropped on unmount, so the un-collapse callback
+    // must survive through the hook-level handlers instead.
+    const conversation = makeConversation({ id: 'conv-3', status: 'open' })
+    server.use(
+      http.patch('/api/conversations/:id', async () => {
+        await delay(80)
+        return HttpResponse.json({ message: 'Simulated network failure' }, { status: 500 })
+      }),
+    )
+
+    const client = testClient()
+    client.setQueryData(detailKey('conv-3'), conversation)
+    const { result, unmount } = renderHook(() => useTriageActions(), { wrapper: wrapperFor(client) })
+
+    let onErrorRan = false
+    act(() => {
+      result.current.resolve('conv-3', { onError: () => (onErrorRan = true) })
+    })
+    unmount() // the row disappeared while the PATCH was still in flight
+
+    await waitFor(() => expect(onErrorRan).toBe(true))
+    expect(client.getQueryData<Conversation>(detailKey('conv-3'))?.status).toBe('open')
+  })
 })

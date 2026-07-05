@@ -33,12 +33,12 @@ view stacks its transcript above the sidebar. Touch users tap a row to open and 
 The mock layer runs in the browser in dev and in the built demo, so the app is fully
 interactive with no backend — including the failure-simulator rollback path.
 
-## Cut three.js and GSAP, kept Lenis
+## Cut the motion libraries: three.js, GSAP, then Lenis
 Phase 8 originally shipped a three.js ambient point-field with scroll-linked parallax
 plus GSAP for stagger/collapse/toast/count-up tweens. The three.js parallax read as janky
 cursor-drag rather than "felt not watched," and GSAP added a dependency + failure surface
-(lazy-chunk error boundary, `matchMedia` reduced-motion plumbing) for effects a few lines
-of Tailwind and `@keyframes` cover just as well. Cut both; Lenis smooth-scroll stays since
-it wasn't the complaint. Row collapse is now a CSS `grid-template-rows` transition, detail
-entrance and toasts are CSS keyframes/transitions, and the summary strip renders its
-numbers directly instead of counting up.
+for effects a few lines of Tailwind and `@keyframes` cover just as well. Lenis followed:
+its lerp'd wheel response made scrolling feel detached from the hand — bad in a tool
+scanned by scrolling — so the app now uses native scroll (`scrollIntoView` + CSS
+`scroll-margin` for the fixed nav). All remaining motion is CSS keyframes/transitions
+with `motion-reduce` variants.

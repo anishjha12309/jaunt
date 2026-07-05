@@ -88,7 +88,7 @@ export function ShortcutsOverlay({ onClose }: ShortcutsOverlayProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4 backdrop-blur-sm animate-[overlay-backdrop-in_150ms_ease-out] motion-reduce:animate-none"
       onClick={onClose}
     >
       <div
@@ -97,7 +97,7 @@ export function ShortcutsOverlay({ onClose }: ShortcutsOverlayProps) {
         aria-modal="true"
         aria-label="Keyboard shortcuts"
         onClick={(event) => event.stopPropagation()}
-        className="w-full max-w-lg rounded-card bg-panel p-6 text-panel-text shadow-[0_16px_48px_rgb(27_27_24_/_0.4)]"
+        className="w-full max-w-lg rounded-card bg-panel p-6 text-panel-text shadow-[0_16px_48px_rgb(27_27_24_/_0.4)] animate-[overlay-panel-in_200ms_ease-out] motion-reduce:animate-none"
       >
         <div className="flex items-start justify-between">
           <h2 className="text-section font-semibold tracking-tight">Keyboard shortcuts</h2>

@@ -25,23 +25,25 @@ function isJsonResponse(response: Response): boolean {
 }
 
 async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    throw new ApiError(response.status, await parseErrorMessage(response))
-  }
-  // A non-JSON body means the request bypassed the MSW worker and hit the host's
-  // SPA fallback (index.html). Surface an actionable message instead of a raw
-  // "Unexpected token '<'" JSON parse error.
+  // A non-JSON body means the request bypassed the MSW worker and hit the host —
+  // the SPA fallback (index.html, 200) or a bare 404/405 error page. Surface an
+  // actionable message instead of a parse error or the host's status text.
   if (!isJsonResponse(response)) {
     throw new ApiError(response.status, 'Mock API unavailable — reload the page to start the service worker.')
+  }
+  if (!response.ok) {
+    throw new ApiError(response.status, await parseErrorMessage(response))
   }
   return response.json() as Promise<T>
 }
 
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   let response = await fetch(url, init)
-  // A bypassed request means the browser terminated the idle mock service worker
-  // and its restart lost this tab's registration — re-activate it and retry once.
-  if (response.ok && !isJsonResponse(response)) {
+  // The mock layer always answers with JSON (its errors included), so any non-JSON
+  // response — whatever its status — means the browser terminated the idle mock
+  // service worker and its restart lost this tab's registration, letting the request
+  // through to the host. Re-activate the worker and retry once.
+  if (!isJsonResponse(response)) {
     const { reviveMockWorker } = await import('@/mocks/reviveWorker')
     if (await reviveMockWorker()) {
       response = await fetch(url, init)

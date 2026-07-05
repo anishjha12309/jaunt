@@ -2,7 +2,7 @@
 
 ## Stack
 Vite + React 18 + TypeScript (strict) · Tailwind v4 (`@theme` tokens) · TanStack Query v5
-· React Router v7 · MSW v2 · Lenis (smooth scroll) · Vitest + RTL · oxlint.
+· React Router v7 · MSW v2 · Vitest + RTL · oxlint.
 
 ## Folders
 - `src/api/` — typed fetch client, query keys, domain types
